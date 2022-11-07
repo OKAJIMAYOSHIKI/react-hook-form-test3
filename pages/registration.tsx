@@ -2,18 +2,11 @@ import { css } from '@emotion/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormContent } from '../src/register/form-content';
 
-type Address = {
+export type Address = {
   zip_code: string;
   city: string;
   street: string;
   building: string;
-};
-
-type ReceiverAddress = {
-  receiver_zip_code: string;
-  receiver_city: string;
-  receiver_street: string;
-  receiver_building: string;
 };
 
 export type RegistrationForm = {
@@ -23,11 +16,15 @@ export type RegistrationForm = {
   gender: 'male' | 'female' | 'other';
   identification_file: { name: string; content: File };
   same_address_check: boolean;
-} & Address &
-  ReceiverAddress;
+  receiver_address: Address[];
+} & Address;
 
 export default function Registration() {
-  const methods = useForm<RegistrationForm>();
+  const methods = useForm<RegistrationForm>({
+    defaultValues: {
+      receiver_address: [{ zip_code: '', city: '', street: '', building: '' }],
+    },
+  });
   return (
     <main css={cssMain}>
       <h1>会員情報の登録</h1>

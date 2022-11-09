@@ -1,12 +1,17 @@
-import React, { useMemo } from 'react';
-import { SubmitHandler, useFieldArray, useFormContext } from 'react-hook-form';
+import React from 'react';
+import {
+  SubmitHandler,
+  useController,
+  useFieldArray,
+  useFormContext,
+} from 'react-hook-form';
 import { Address, RegistrationForm } from '../../pages/registration';
 import { FileInput, FileInputProps } from '../shared/form/file-input';
 import {
   MultipleBoxGroup,
-  MultipleBoxGroupProps,
   MultipleBoxGroupStyles,
 } from '../shared/form/multiple-box-group';
+import type { MultipleBoxGroupProps } from '../shared/form/multiple-box-group';
 import {
   TextBoxDouble,
   TextBoxDoubleProps,
@@ -62,104 +67,108 @@ export const FormContent: React.FC = () => {
   };
   const onClickRemoveByIndex = (index: number) => () => remove(index);
 
-  const fields: RegistrationFields[] = useMemo(
-    () => [
-      {
-        componentName: 'TextBoxDouble',
-        props: {
-          legend: '氏名',
-          style: textBoxDoubleStyles,
-          firstField: {
-            label: '氏',
-            type: 'text',
-            ...register('first_name'),
+  const fields: RegistrationFields[] = [
+    {
+      componentName: 'TextBoxDouble',
+      props: {
+        legend: '氏名',
+        style: textBoxDoubleStyles,
+        firstField: {
+          label: '氏',
+          type: 'text',
+          ...register('first_name'),
+        },
+        secondField: {
+          label: '名',
+          type: 'text',
+          ...register('last_name'),
+        },
+      },
+    },
+    {
+      componentName: 'FileInput',
+      props: {
+        label: 'アイコンの登録',
+        ...useController({ name: 'image', control }),
+      } as FileInputProps,
+    },
+    {
+      componentName: 'TextBox',
+      props: {
+        label: '電話番号',
+        type: 'number',
+        style: textBoxStyles,
+        ...register('phone'),
+      },
+    },
+    {
+      componentName: 'MultipleBox',
+      props: {
+        legend: '性別',
+        type: 'radio',
+        style: radioGroupStyles,
+        inputItems: [
+          { label: '女性', value: 'female', ...register('gender') },
+          { label: '男性', value: 'male', ...register('gender') },
+          { label: 'その他', value: 'other', ...register('gender') },
+        ],
+      },
+    },
+    {
+      componentName: 'Address',
+      props: {
+        fields: [
+          {
+            label: '郵便番号',
+            type: 'number',
+            style: textBoxStyles,
+            ...register('zip_code'),
           },
-          secondField: {
-            label: '名',
+          {
+            label: '都道府県・市区町村',
             type: 'text',
-            ...register('last_name'),
+            style: textBoxStyles,
+            ...register('city'),
           },
-        },
-      },
-      {
-        componentName: 'TextBox',
-        props: {
-          label: '電話番号',
-          type: 'number',
-          style: textBoxStyles,
-          ...register('phone'),
-        },
-      },
-      {
-        componentName: 'MultipleBox',
-        props: {
-          legend: '性別',
-          type: 'radio',
-          style: radioGroupStyles,
-          inputItems: [
-            { label: '女性', value: 'female', ...register('gender') },
-            { label: '男性', value: 'male', ...register('gender') },
-            { label: 'その他', value: 'other', ...register('gender') },
-          ],
-        },
-      },
-      {
-        componentName: 'Address',
-        props: {
-          fields: [
-            {
-              label: '郵便番号',
-              type: 'number',
-              style: textBoxStyles,
-              ...register('zip_code'),
+          {
+            label: '番地',
+            type: 'text',
+            style: textBoxStyles,
+            ...register('street'),
+          },
+          {
+            label: '建物名',
+            type: 'text',
+            style: {
+              ...textBoxStyles,
+              container: css([
+                textBoxStyles.container,
+                css({ marginBottom: 0 }),
+              ]),
             },
-            {
-              label: '都道府県・市区町村',
-              type: 'text',
-              style: textBoxStyles,
-              ...register('city'),
-            },
-            {
-              label: '番地',
-              type: 'text',
-              style: textBoxStyles,
-              ...register('street'),
-            },
-            {
-              label: '建物名',
-              type: 'text',
-              style: {
-                ...textBoxStyles,
-                container: css([
-                  textBoxStyles.container,
-                  css({ marginBottom: 0 }),
-                ]),
-              },
-              ...register('building'),
-            },
-          ],
-        },
+            ...register('building'),
+          },
+        ],
       },
-      {
-        componentName: 'SelectionInput',
-        props: {
-          label: 'お届け先を別の住所に設定する',
-          type: 'checkbox',
-          value: true,
-          ...register('same_address_check'),
-        },
+    },
+    {
+      componentName: 'SelectionInput',
+      props: {
+        label: 'お届け先を別の住所に設定する',
+        type: 'checkbox',
+        value: true,
+        ...register('same_address_check'),
       },
-      {
-        componentName: 'AddressFieldArray',
-        props: {
-          fields: receiver_addresses,
-          onClickAppend,
-          onClickRemoveByIndex,
-        },
+    },
+    {
+      componentName: 'AddressFieldArray',
+      props: {
+        fields: receiver_addresses,
+        onClickAppend,
+        onClickRemoveByIndex,
       },
-    ],
-    [receiver_addresses]
-  );
+    },
+  ];
 
   const formContentView = fields.map(({ componentName, props }, index) => {
     switch (componentName) {
@@ -172,7 +181,7 @@ export const FormContent: React.FC = () => {
       case 'MultipleBox':
         return <MultipleBoxGroup key={props.legend} {...props} />;
       case 'FileInput':
-        return <FileInput key={props.name} {...props} />;
+        return <FileInput key={props.field.name} {...props} />;
       case 'Address':
         return <AddressFields key={props.fields[0].name} {...props} />;
       case 'AddressFieldArray':

@@ -12,6 +12,7 @@ export type Address = {
 export type RegistrationForm = {
   first_name: string;
   last_name: string;
+  image: File | undefined;
   phone: number;
   gender: 'male' | 'female' | 'other';
   identification_file: { name: string; content: File };
